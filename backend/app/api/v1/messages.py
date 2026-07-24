@@ -311,7 +311,7 @@ async def _ai_reply_stream(
         messages = generator._build_messages(user_message, context, chat_history)
 
         full_content = ""
-        async for token in generator.llm.chat_stream(messages, temperature=0.3, max_tokens=512):
+        async for token in generator.llm.chat_stream(messages, temperature=0.3, max_tokens=1024):
             full_content += token
             yield f"event: ai_chunk\ndata: {json.dumps({'chunk': token, 'index': len(full_content)})}\n\n"
             await asyncio.sleep(0.01)
@@ -449,7 +449,7 @@ async def _generate_comfort_message(user_message: str) -> str:
         from app.llm.base import ChatMessage
         llm = get_llm_provider()
         prompt = COMFORT_PROMPT.format(message=user_message[:300])
-        resp = await llm.chat([ChatMessage(role="user", content=prompt)], temperature=0.5, max_tokens=150)
+        resp = await llm.chat([ChatMessage(role="user", content=prompt)], temperature=0.5, max_tokens=300)
         return resp.content.strip()
     except Exception:
         return "非常抱歉给您带来不愉快的体验，我们已收到您的反馈，客服专员将优先为您处理，请稍候。"

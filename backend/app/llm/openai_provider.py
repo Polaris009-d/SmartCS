@@ -20,6 +20,12 @@ class OpenAIProvider(BaseLLMProvider):
     def provider_name(self) -> str:
         return "openai"
 
+    def _ensure_system_message(self, msgs: list[dict]) -> list[dict]:
+        """deepseek-v4-pro 需要 system message"""
+        if not any(m["role"] == "system" for m in msgs):
+            msgs = [{"role": "system", "content": "You are a helpful assistant."}] + msgs
+        return msgs
+
     async def chat(
         self,
         messages: list[ChatMessage],
@@ -30,7 +36,7 @@ class OpenAIProvider(BaseLLMProvider):
         msgs = [{"role": m.role, "content": m.content} for m in messages]
         kwargs = {
             "model": self.model,
-            "messages": msgs,
+            "messages": self._ensure_system_message(msgs),
             "temperature": temperature,
             "max_tokens": max_tokens,
         }
@@ -57,7 +63,7 @@ class OpenAIProvider(BaseLLMProvider):
         msgs = [{"role": m.role, "content": m.content} for m in messages]
         stream = await self.client.chat.completions.create(
             model=self.model,
-            messages=msgs,
+            messages=self._ensure_system_message(msgs),
             temperature=temperature,
             max_tokens=max_tokens,
             stream=True,

@@ -31,7 +31,7 @@ class SentimentService:
             resp = await self.llm.chat(
                 messages=[ChatMessage(role="user", content=prompt)],
                 temperature=0.1,
-                max_tokens=80,
+                max_tokens=200,
             )
             import json, re
             text = resp.content.strip()
